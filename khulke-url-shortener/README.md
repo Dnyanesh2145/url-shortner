@@ -75,4 +75,4 @@ $ curl http://localhost:8080/healthcheck
 - health check is there at: http://localhost:8081/health
 
 ## Contributers
-[dnyanesh.int@loktantram.com](mailto:dnyanesh.int@loktantram.com)
+[dnyaneshrode07@gmail.com](mailto:dnyaneshrode07@gmail.com)
