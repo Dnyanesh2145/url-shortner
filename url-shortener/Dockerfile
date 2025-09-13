@@ -22,7 +22,7 @@ CMD ["go", "run", "main.go"]
 
 # Use 'scratch' image for super-mini build.
 # .dockerignore may not be required because we copy only needed
-FROM scratch as production
+FROM scratch AS production
 COPY --from=build /main .
 COPY --from=build /app/.env.sample ./.env
 COPY --from=build /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/

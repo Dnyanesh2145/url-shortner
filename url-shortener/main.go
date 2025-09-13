@@ -3,7 +3,7 @@ package main
 import (
 	"fiber-url-shortner/config"
 	"fiber-url-shortner/database"
-	"fiber-url-shortner/helpers"
+	// "fiber-url-shortner/helpers"
 	"fiber-url-shortner/routes"
 	"fiber-url-shortner/utils"
 	"fmt"
@@ -40,7 +40,7 @@ func main() {
 		return c.Next() // Proceed with processing the request
 	})
 	// Initialize default config
-	app.Use(helpers.CheckIPAdress)
+	// app.Use(helpers.CheckIPAdress)
 	// Or extend your config for customization
 	intvalue, _ := strconv.Atoi(config.EnvDBURI("RATELIMITIG_PER_MINUTE"))
 

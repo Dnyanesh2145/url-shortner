@@ -5,12 +5,11 @@ import (
 	"fiber-url-shortner/config"
 	"fiber-url-shortner/helpers"
 	"fmt"
+	"gorm.io/driver/mysql"
+	"gorm.io/gorm"
 	"log"
 	"os"
 	"time"
-
-	"gorm.io/driver/postgres"
-	"gorm.io/gorm"
 )
 
 // Database instance
@@ -27,18 +26,18 @@ INSERT INTO url_shortner_api_logs (
 	httpmethod, referrer, responsesize, responsetime, statuscode,
 	statusmessage, useragent, created_at
 ) VALUES (
-	$1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14
+	?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
 )`
 
-var insertquery = `INSERT INTO url_shortner (id, url ,created_at) VALUES (?,?,?) on conflict(url)
-	do update set url=? returning id`
+var insertquery = `INSERT INTO url_shortner (id, url ,created_at) VALUES (?,?,?)`
 var selectQuery = `SELECT url FROM url_shortner WHERE id = ? limit 1`
 var selectIDQuery = `SELECT count(1) FROM url_shortner WHERE id = ?`
 
 // Connect function
 func DBConnect() {
-	mdb, err1 := gorm.Open(postgres.Open(config.EnvDBURI("DATABASE_MASTER_URI")), &gorm.Config{})
-	sdb, err2 := gorm.Open(postgres.Open(config.EnvDBURI("DATABASE_SLAVE_URI")), &gorm.Config{})
+	log.Println("env variable-->", config.EnvDBURI("DATABASE_MASTER_URI"))
+	mdb, err1 := gorm.Open(mysql.Open(config.EnvDBURI("DATABASE_MASTER_URI")), &gorm.Config{})
+	sdb, err2 := gorm.Open(mysql.Open(config.EnvDBURI("DATABASE_SLAVE_URI")), &gorm.Config{})
 	if err1 != nil || err2 != nil {
 		fmt.Printf("database connection failed %s %s", err1.Error(), err2.Error())
 		os.Exit(2)
@@ -83,7 +82,7 @@ func DBPing() (string, error) {
 }
 
 func InsertData(id string, url string) (string, error) {
-	tx := DB.MDb.Raw(insertquery, id, url, time.Now(), url).Scan(&id)
+	tx := DB.MDb.Raw(insertquery, id, url, time.Now()).Scan(&id)
 	return id, tx.Error
 }
 
@@ -105,7 +104,7 @@ func GetURL(id string) (string, error) {
 }
 
 func InsertLogData(logs helpers.LogModel) error {
-	err := DB.MDb.Exec(logquery, logs.Userid, logs.Requestid, logs.DeviceInfo, logs.Endpoint, logs.IP,
+	err := DB.MDb.Debug().Exec(logquery, logs.Userid, logs.Requestid, logs.DeviceInfo, logs.Endpoint, logs.IP,
 		logs.Location, logs.Method, logs.Referrer, logs.ResponseSize, logs.ResponseTime,
 		logs.StatusCode, logs.StatusMessage, logs.UserAgent, logs.CreatedAt).Error
 	return err
